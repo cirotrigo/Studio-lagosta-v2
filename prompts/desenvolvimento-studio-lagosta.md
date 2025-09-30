@@ -39,7 +39,7 @@ Implementar no **Studio Lagosta V2** (Next.js 15 + Prisma + Clerk) um sistema co
 3. **Geração de Criativos**: Single e Carousel com preview em tempo real
 4. **Renderização Unificada**: Canvas API em frontend e backend
 5. **Gestão de Assets**: Logos, elementos, fontes customizadas
-6. **Integrações**: Google Drive (fotos), Cloudinary (storage)
+6. **Integrações**: Google Drive (fotos), Vercel Blob (storage)
 
 ### Fora do Escopo (Fase 2)
 - Publicação no Instagram/Facebook
@@ -53,10 +53,9 @@ Implementar no **Studio Lagosta V2** (Next.js 15 + Prisma + Clerk) um sistema co
 ### Variáveis de Ambiente
 Adicione em `.env.local`:
 ```env
-# Cloudinary (Storage de imagens)
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=seu_cloud_name
-CLOUDINARY_API_KEY=sua_api_key
-CLOUDINARY_API_SECRET=seu_api_secret
+# Vercel Blob (Storage de imagens)
+BLOB_READ_WRITE_TOKEN=seu_token_blob
+BLOB_MAX_SIZE_MB=25
 
 # Google Drive API (Opcional - importação de fotos)
 GOOGLE_DRIVE_CLIENT_ID=seu_client_id
@@ -70,7 +69,6 @@ FONTS_DIR=/tmp/fonts # Diretório temporário para fontes registradas
 ### Dependências
 ```bash
 npm install @napi-rs/canvas
-npm install cloudinary
 npm install sharp # Processamento de imagens
 npm install fitty # Auto-resize de texto (opcional frontend)
 ```
@@ -78,7 +76,7 @@ npm install fitty # Auto-resize de texto (opcional frontend)
 ### Documentação de Referência
 - **Node.js Canvas**: https://github.com/Automattic/node-canvas
 - **@napi-rs/canvas**: https://github.com/Brooooooklyn/canvas (mais rápido, usado no V1)
-- **Cloudinary Upload**: https://cloudinary.com/documentation/node_image_upload
+- **Vercel Blob**: https://vercel.com/docs/storage/vercel-blob
 - **HTML5 Canvas API**: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
 
 ## Arquitetura de Alto Nível
@@ -98,7 +96,7 @@ Backend:
   - @napi-rs/canvas (renderização)
   - Prisma ORM (PostgreSQL)
   - Clerk Auth (autenticação)
-  - Cloudinary SDK (storage)
+  - Vercel Blob SDK (storage)
 
 Compartilhado:
   - RenderEngine unificado (lib/render-engine.ts)
@@ -821,28 +819,35 @@ export async function GET(
 // GET, POST - Listar e fazer upload de fontes customizadas
 
 // src/app/api/upload/route.ts
-// POST - Upload genérico para Cloudinary
+// POST - Upload genérico para Vercel Blob
 export async function POST(request: Request) {
-  const { userId } = await auth();
-  if (!userId) return unauthorized();
+  const { userId } = await auth()
+  if (!userId) return json({ error: 'Não autorizado' }, { status: 401 })
 
-  const formData = await request.formData();
-  const file = formData.get('file') as File;
+  const form = await request.formData()
+  const file = form.get('file') as File | null
+  if (!file) return json({ error: 'Nenhum arquivo' }, { status: 400 })
 
-  if (!file) {
-    return json({ error: 'No file provided' }, { status: 400 });
+  const maxMb = Number(process.env.BLOB_MAX_SIZE_MB || '25')
+  const maxBytes = Math.max(1, maxMb) * 1024 * 1024
+  if (file.size > maxBytes) {
+    return json({ error: `Arquivo muito grande (máx ${maxMb}MB)` }, { status: 413 })
   }
 
-  // Upload para Cloudinary
-  const result = await uploadToCloudinary(file, {
-    folder: 'studio-lagosta-v2',
-    resource_type: 'auto',
-  });
+  const ext = file.name?.split('.').pop()?.toLowerCase() || 'bin'
+  const safeName = file.name?.replace(/[^a-z0-9._-]/gi, '_') || `upload.${ext}`
+  const key = `uploads/${userId}/${Date.now()}-${safeName}`
+
+  const token = process.env.BLOB_READ_WRITE_TOKEN
+  const uploaded = await put(key, file, { access: 'public', token })
 
   return json({
-    url: result.secure_url,
-    publicId: result.public_id,
-  });
+    url: uploaded.url,
+    pathname: uploaded.pathname,
+    contentType: file.type,
+    size: file.size,
+    name: file.name,
+  })
 }
 ```
 
@@ -1684,14 +1689,15 @@ export async function renderGeneration(generation: any): Promise<string> {
   // Renderizar
   const buffer = await renderer.renderTemplate(template, generation.fieldValues);
 
-  // Upload para Cloudinary
-  const result = await uploadToCloudinary(buffer, {
-    folder: 'studio-lagosta-v2/generations',
-    public_id: generation.id,
-    resource_type: 'image',
+  const key = `generations/${generation.id}.png`;
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const result = await put(key, buffer, {
+    access: 'public',
+    token,
+    contentType: 'image/png',
   });
 
-  return result.secure_url;
+  return result.url;
 }
 
 /**
@@ -1704,17 +1710,15 @@ export async function generateThumbnail(template: Template): Promise<string> {
   // Renderizar template vazio (sem fieldValues)
   const buffer = await renderer.renderTemplate(template, {});
 
-  // Upload para Cloudinary
-  const result = await uploadToCloudinary(buffer, {
-    folder: 'studio-lagosta-v2/thumbnails',
-    public_id: `template-${template.id}`,
-    resource_type: 'image',
-    transformation: [
-      { width: 800, height: 1000, crop: 'fill' }
-    ]
+  const key = `thumbnails/template-${template.id}.png`;
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const result = await put(key, buffer, {
+    access: 'public',
+    token,
+    contentType: 'image/png',
   });
 
-  return result.secure_url;
+  return result.url;
 }
 ```
 
@@ -2330,7 +2334,7 @@ export const createCarouselSchema = z.object({
 1. ✅ Criar schema Prisma e migrations
 2. ✅ Implementar RenderEngine unificado
 3. ✅ Implementar CanvasRenderer (backend)
-4. ✅ Configurar Cloudinary upload
+4. ✅ Configurar Vercel Blob upload
 5. ✅ Criar APIs base de Projetos e Templates
 
 ### Fase 2: Editor de Templates
@@ -2377,7 +2381,7 @@ export const createCarouselSchema = z.object({
 - [ ] Implementar CanvasRenderer.ts (Node.js)
 - [ ] Criar API routes com Zod validation
 - [ ] Implementar auth checks (Clerk)
-- [ ] Implementar Cloudinary upload
+- [ ] Implementar upload para Vercel Blob
 - [ ] Testar renderização de texto (quebra de linha)
 - [ ] Testar renderização de gradientes
 - [ ] Testar renderização de imagens (objectFit)
@@ -2478,7 +2482,7 @@ logger.info('Generation completed', {
 | Framework | React + Express (separados) | Next.js 15 (unificado) |
 | Auth | Replit Auth | Clerk |
 | Database | PostgreSQL + Drizzle | PostgreSQL + Prisma |
-| Storage | Local + Cloudinary | Cloudinary apenas |
+| Storage | Local + Vercel Blob | Vercel Blob apenas |
 | Styling | Tailwind v3 | Tailwind v4 |
 | Forms | React Hook Form | React Hook Form + Zod |
 | State | Zustand | TanStack Query (server state) |
