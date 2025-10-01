@@ -2333,6 +2333,43 @@ export default function StudioPage() {
 }
 ```
 
+### Gestão de Criativos
+
+**Página:** `src/app/(protected)/projects/[id]/creativos/page.tsx`
+
+```tsx
+'use client'
+
+import * as React from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api-client'
+import { TemplateSelector } from '@/components/studio/TemplateSelector'
+import { PhotoSelector } from '@/components/studio/PhotoSelector'
+import { StudioCanvas } from '@/components/studio/StudioCanvas'
+import { FieldsForm, getDynamicFieldDefinitions } from '@/components/studio/FieldsForm'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card } from '@/components/ui/card'
+import { useToast } from '@/hooks/use-toast'
+import { usePageConfig } from '@/hooks/use-page-config'
+
+// ... implementação completa disponível no repositório ...
+```
+
+**Componentes auxiliares:**
+- `src/components/studio/TemplateSelector.tsx`
+- `src/components/studio/PhotoSelector.tsx`
+- `src/components/studio/StudioCanvas.tsx`
+- `src/components/studio/FieldsForm.tsx`
+
+**Principais recursos:**
+- Filtro por status, busca textual e opção de exibir somente criativos com arquivo pronto.
+- Alternância entre visualização em grade e lista com seleção múltipla.
+- Download individual ou em lote das imagens geradas.
+- Lightbox para visualizar o criativo em tamanho maior.
+- Acesso rápido ao Studio e à página do projeto, com ações de remoção das gerações.
+
 ## Schemas de Validação (Zod)
 
 ```typescript
@@ -2437,11 +2474,11 @@ export const createCarouselSchema = z.object({
 6. Integrar geração backend
 
 ### Fase 4: Gestão de Criativos
-1. Criar página de listagem (`/projects/[id]/creativos`)
-2. Implementar grid/list view
-3. Implementar filtros e busca
-4. Implementar download individual/bulk
-5. Implementar lightbox (PhotoSwipe)
+1. ✅ Criar página de listagem (`/projects/[id]/creativos`)
+2. ✅ Implementar alternância grid/list view
+3. ✅ Implementar filtros e busca
+4. ✅ Implementar download individual/bulk
+5. ✅ Implementar lightbox (preview ampliado)
 
 ### Fase 5: Assets e Integrações
 1. Implementar upload de logos
