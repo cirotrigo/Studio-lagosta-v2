@@ -2487,11 +2487,11 @@ export const createCarouselSchema = z.object({
 4. Integrar Google Drive API (opcional)
 
 ### Fase 6: Testes e Refinamentos
-1. Testar consistência frontend ↔ backend
-2. Comparar preview com geração final
-3. Testar carrossel (múltiplos slides)
-4. Otimizar performance (caching, lazy loading)
-5. Testes de acessibilidade
+1. ✅ Testar consistência frontend ↔ backend
+2. ✅ Comparar preview com geração final
+3. ✅ Testar carrossel (múltiplos slides)
+4. ✅ Otimizar performance (caching, lazy loading)
+5. ✅ Testes de acessibilidade
 
 ## Checklists
 
