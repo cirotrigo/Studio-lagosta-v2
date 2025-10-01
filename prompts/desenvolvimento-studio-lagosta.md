@@ -1953,6 +1953,86 @@ export const FONT_CONFIG = {
 
 ## Componentes Frontend
 
+### Páginas de Navegação
+
+#### 1. Atualizar Menu de Navegação (Sidebar)
+
+**Arquivo:** `src/components/app/sidebar.tsx`
+
+Adicionar items de navegação para o Studio Lagosta:
+
+```typescript
+// Adicionar imports
+import {
+  FolderOpen,
+  FileText,
+  Image as ImageIcon,
+  Sparkles,
+} from "lucide-react";
+
+// Atualizar navigationItems
+export const navigationItems = [
+  { name: "Painel", href: "/dashboard", icon: Home },
+  { name: "Projetos", href: "/projects", icon: FolderOpen }, // NOVO
+  { name: "Chat com IA", href: "/ai-chat", icon: Bot },
+  { name: "Cobrança", href: "/billing", icon: CreditCard },
+];
+```
+
+#### 2. Página de Listagem de Projetos
+
+**Rota:** `/projects`
+**Arquivo:** `src/app/(protected)/projects/page.tsx`
+
+**Funcionalidades:**
+- Listar todos os projetos do usuário
+- Criar novo projeto (modal com formulário)
+- Deletar projeto (com confirmação)
+- Cards com contadores (templates, criativos)
+- Estado vazio (quando não há projetos)
+
+**Código:** (exemplo completo no repositório)
+
+**Features principais:**
+```typescript
+- useQuery para listar projetos
+- useMutation para criar/deletar
+- React Hook Form + Zod para validação
+- Toast notifications (sonner)
+- Dialog modal (Radix UI)
+- Grid responsivo de cards
+```
+
+#### 3. Página de Detalhes do Projeto
+
+**Rota:** `/projects/[id]`
+**Arquivo:** `src/app/(protected)/projects/[id]/page.tsx`
+
+**Funcionalidades:**
+- Tabs: Templates | Criativos | Configurações
+- Tab Templates:
+  - Grid de cards de templates
+  - Criar novo template (modal com tipo)
+  - Editar template (link para editor)
+  - Deletar template
+  - Thumbnails dos templates
+- Estado vazio para cada tab
+
+**Tipos de Template:**
+```typescript
+const TEMPLATE_TYPES = [
+  { value: 'STORY', label: 'Story (9:16)', dimensions: '1080x1920' },
+  { value: 'FEED', label: 'Feed (4:5)', dimensions: '1080x1350' },
+  { value: 'SQUARE', label: 'Quadrado (1:1)', dimensions: '1080x1080' },
+]
+```
+
+**Modal de Criação:**
+- Nome do template (input)
+- Tipo (select com 3 opções)
+- Dimensões (auto-preenchido baseado no tipo)
+- Validação com Zod
+
 ### Editor de Templates
 
 **Página:** `src/app/(protected)/templates/[id]/editor/page.tsx`
@@ -2337,13 +2417,16 @@ export const createCarouselSchema = z.object({
 4. ✅ Configurar Vercel Blob upload
 5. ✅ Criar APIs base de Projetos e Templates
 
-### Fase 2: Editor de Templates
-1. Criar página do editor (`/templates/[id]/editor`)
-2. Implementar Canvas DOM (drag-and-drop)
-3. Implementar Layers Panel
-4. Implementar Properties Panel
-5. Implementar Toolbar com ações
-6. Adicionar CanvasPreview (preview unificado)
+### Fase 2: Páginas de Navegação e Editor de Templates
+1. ✅ Criar página de listagem de Projetos (`/projects`)
+2. ✅ Criar página de detalhes do Projeto (`/projects/[id]`)
+3. ✅ Atualizar menu de navegação (Sidebar)
+4. ✅ Criar página do editor (`/templates/[id]/editor`)
+5. ✅ Implementar Canvas DOM (drag-and-drop)
+6. ✅ Implementar Layers Panel
+7. ✅ Implementar Properties Panel
+8. ✅ Implementar Toolbar com ações
+9. ✅ Adicionar CanvasPreview (preview unificado)
 
 ### Fase 3: Studio de Geração
 1. Criar página do studio (`/projects/[id]/studio`)
