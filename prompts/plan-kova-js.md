@@ -1715,7 +1715,8 @@ export function useHistory() {
 ### **FASE 8: Export e Performance** (3-4 dias)
 
 **Objetivos:**
-- Implementar export profissional (PNG, JPG, PDF)
+- Implementar export profissional (PNG, JPG)
+- Implementar nova aba (lado direito junto com as propriedades ) criativos com as exports para visualização com lightbox
 - Otimizar performance para templates grandes
 - Adicionar loading states
 
@@ -1728,23 +1729,18 @@ export function useHistory() {
    })
    ```
 
-2. ✅ Adicionar export para PDF
-   - Usar jsPDF
-   - Manter qualidade
-
-3. ✅ Otimizar performance
+2. ✅ Otimizar performance
    - Object caching (`layer.cache()`)
    - Lazy rendering
    - Virtualized layers panel
 
-4. ✅ Adicionar loading states
+3. ✅ Adicionar loading states
    - Skeleton loaders
    - Progress indicators
    - Optimistic UI updates
 
 **Critérios de Sucesso:**
 - [ ] Export PNG em alta resolução
-- [ ] PDF mantém vetores (quando possível)
 - [ ] Performance suave com 50+ layers
 - [ ] Loading states em todas operações assíncronas
 
