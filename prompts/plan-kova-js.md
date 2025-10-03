@@ -1746,32 +1746,20 @@ export function useHistory() {
 
 ---
 
-### **FASE 9: Preview em Tempo Real** (2-3 dias)
+### **FASE 9: Preview em Tempo Real**
 
 **Objetivos:**
 - Canvas já É o preview (WYSIWYG)
-- Adicionar preview modal para export
-- Preview responsivo (diferentes tamanhos)
+
 
 **Tarefas:**
 1. ✅ Canvas como WYSIWYG
    - O que você vê é o que você exporta
    - Renderização idêntica ao backend
 
-2. ✅ Criar `PreviewModal`
-   - Preview antes de export
-   - Diferentes formatos (PNG, JPG, PDF)
-   - Ajuste de qualidade
-
-3. ✅ Preview responsivo
-   - Mobile preview
-   - Tablet preview
-   - Desktop preview
 
 **Critérios de Sucesso:**
 - [ ] Canvas representa 100% do export final
-- [ ] Preview modal mostra resultado exato
-- [ ] Responsive preview funciona
 
 ---
 
